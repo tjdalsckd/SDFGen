@@ -125,42 +125,7 @@ int main(int argc, char* argv[]) {
 
   std::string outname;
 
-  #ifdef HAVE_VTK
-    // If compiled with VTK, we can directly output a volumetric image format instead
-    //Very hackily strip off file suffix.
-    outname = filename.substr(0, filename.size()-4) + std::string(".vti");
-    std::cout << "Writing results to: " << outname << "\n";
-    vtkSmartPointer<vtkImageData> output_volume = vtkSmartPointer<vtkImageData>::New();
 
-    output_volume->SetDimensions(phi_grid.ni ,phi_grid.nj ,phi_grid.nk);
-    output_volume->SetOrigin( phi_grid.ni*dx/2, phi_grid.nj*dx/2,phi_grid.nk*dx/2);
-    output_volume->SetSpacing(dx,dx,dx);
-
-    vtkSmartPointer<vtkFloatArray> distance = vtkSmartPointer<vtkFloatArray>::New();
-    
-    distance->SetNumberOfTuples(phi_grid.a.size());
-    
-    output_volume->GetPointData()->AddArray(distance);
-    distance->SetName("Distance");
-
-    for(unsigned int i = 0; i < phi_grid.a.size(); ++i) {
-      distance->SetValue(i, phi_grid.a[i]);
-    }
-
-    vtkSmartPointer<vtkXMLImageDataWriter> writer =
-    vtkSmartPointer<vtkXMLImageDataWriter>::New();
-    writer->SetFileName(outname.c_str());
-
-    #if VTK_MAJOR_VERSION <= 5
-      writer->SetInput(output_volume);
-    #else
-      writer->SetInputData(output_volume);
-    #endif
-    writer->Write();
-
-  #else
-    // if VTK support is missing, default back to the original ascii file-dump.
-    //Very hackily strip off file suffix.
     outname = filename.substr(0, filename.size()-4) + std::string(".sdf");
     std::cout << "Writing results to: " << outname << "\n";
     
@@ -172,7 +137,6 @@ int main(int argc, char* argv[]) {
       outfile << phi_grid.a[i] << std::endl;
     }
     outfile.close();
-  #endif
 
   std::cout << "Processing complete.\n";
 
